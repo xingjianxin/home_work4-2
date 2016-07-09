@@ -1,2 +1,6 @@
 hello
+<<<<<<< HEAD
 world
+=======
+qiqi
+>>>>>>> f73461bb8b2df6d72199a367b6afe9e47e2ef875
