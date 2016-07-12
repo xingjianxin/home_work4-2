@@ -2,20 +2,32 @@ function Event(){
     this._events={};
 }
 Event.prototype.on=function(eventName,callback){
-    if(this._events[eventName]){
-        this._events[eventName].push(callback);
+    var cur=this._events[eventName];
+    if(cur){
+        for(var i=0;i<cur.length;i++){
+            if(cur[i]===callback){
+                return;
+            }
+        }
+        cur.push(callback);
     }else{
         this._events[eventName]=[callback];
     }
 };
 Event.prototype.once=function(eventName,callback){
+    var curEventName=this._events[eventName];
     if(!('flag' in callback)){
         callback.flag=true;
     }else{
         return;
     }
-    if(this._events[eventName]){
+    if(curEventName){
         this._events[eventName].push(callback);
+        curEventName.forEach(function(item,index){
+            if(item===callback){
+                return;
+            }
+        });
     }else{
         this._events[eventName] = [callback];
     }
@@ -25,26 +37,30 @@ Event.prototype.emit=function(eventName){
     var cur=this._events[eventName],
         that=this;
     if(cur){
-        cur.forEach(function(item,index){
-            if(typeof item==='function'){
-                if(!('flag' in item)){
-                    item.apply(that,arg);
-                }else if('flag' in item&&item.flag===true){
-                    item.apply(that,arg);
-                    item.flag=false;
+        for(var i=0;i<cur.length;i++){
+            if(typeof cur[i]==='function'){
+                if(!('flag' in cur[i])){
+                    cur[i].apply(that,arg);
+                }else if('flag' in cur[i]&&cur[i].flag===true){
+                    cur[i].apply(that,arg);
+                    cur[i].flag=false;
                 }
+            }else{
+                cur.splice(i,1);
+                i--;
             }
-        })
+        }
     }
 };
 Event.prototype.remove=function(eventName,callback){
     var cur=this._events[eventName];
     if(cur){
-        cur.forEach(function(item){
-            if(item===callback){
-                item=null;
+        for(var i=0;i<cur.length;i++){
+            if(cur[i]===callback){
+                cur[i]=null;
+                return;
             }
-        })
+        }
     }
 };
 function makePAsync(path){
@@ -66,4 +82,3 @@ function makePAsync(path){
         makePAsync(path,n);
     }
 }
-
